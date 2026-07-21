@@ -1,0 +1,135 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "borg-overview",
+    "title": "Borg System Overview",
+    "tags": ["borg"],
+    "timezone": "browser",
+    "schemaVersion": 36,
+    "refresh": "5s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Brain Cycle Duration (p95)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(borg_brain_cycle_duration_seconds_bucket[5m]))",
+            "legendFormat": "p95"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "min": 0
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "LLM Inference Latency (p95)",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(borg_llm_inference_latency_seconds_bucket[5m]))",
+            "legendFormat": "p95"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "min": 0
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "Memory Usage",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "borg_memory_usage_mb",
+            "legendFormat": "Memory (MB)"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "decmbytes",
+            "min": 0
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+      },
+      {
+        "id": 4,
+        "title": "CPU Usage",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "borg_cpu_usage_percent",
+            "legendFormat": "CPU %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100
+          }
+        },
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+      },
+      {
+        "id": 5,
+        "title": "Brain Cycles by Status",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(borg_brain_cycles_total[1m])",
+            "legendFormat": "{{status}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+      },
+      {
+        "id": 6,
+        "title": "Forecasts Generated Per Minute",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(borg_forecasts_generated_total[1m]) * 60",
+            "legendFormat": "{{symbol}} {{direction}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+      },
+      {
+        "id": 7,
+        "title": "Errors by Component",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(borg_errors_total[1m])",
+            "legendFormat": "{{component}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24}
+      },
+      {
+        "id": 8,
+        "title": "Pending Tasks",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "borg_pending_tasks",
+            "legendFormat": "Pending"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24}
+      }
+    ]
+  },
+  "overwrite": true
+}

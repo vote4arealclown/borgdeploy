@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}{{ report.title }} · Borg{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="/reports/marketplace">Marketplace</a> / Home Run Tracker</div>
+<h2 style="margin-top:0">{{ report.title }}</h2>
+<p class="muted">{{ report.description }}</p>
+
+<div class="actions">
+    <a class="btn" href="/reports/marketplace">← Marketplace</a>
+    <a class="btn" href="/api/reports/{{ report.slug }}" target="_blank">Raw JSON</a>
+    <a class="btn" href="/api/reports/{{ report.slug }}/pdf" target="_blank">Download PDF</a>
+</div>
+
+<div class="panel">
+    <h2>Ranked Candidates</h2>
+    <table>
+        <thead><tr><th>Rank</th><th>Player</th><th>Team</th><th>Weather Score</th><th>Tier</th><th>Red Flags</th></tr></thead>
+        <tbody>
+        {% for c in content.candidates %}
+        <tr>
+            <td>{{ c.rank }}</td>
+            <td>{{ c.player }}</td>
+            <td>{{ c.team }}</td>
+            <td>{{ "%.1f" | format(c.weather_score) }}</td>
+            <td>{{ c.tier }}</td>
+            <td class="muted">{{ c.red_flags }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="panel">
+    <h2>Methodology</h2>
+    <p>{{ content.methodology }}</p>
+</div>
+{% endblock %}

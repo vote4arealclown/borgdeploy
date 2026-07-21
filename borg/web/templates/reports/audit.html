@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Audit Trail · Borg{% endblock %}
+{% block content %}
+<div class="breadcrumb">Reports / Audit Trail</div>
+<h2 style="margin-top:0">Audit Trail</h2>
+
+<div class="actions">
+    <a class="btn" href="/api/audit?limit=500" target="_blank">Raw JSON</a>
+    <button onclick="loadAudit()">Refresh</button>
+</div>
+
+<div class="panel">
+    <table>
+        <thead><tr><th>ID</th><th>Time</th><th>Actor</th><th>Action</th><th>Detail</th></tr></thead>
+        <tbody id="auditTable"></tbody>
+    </table>
+</div>
+
+<script>
+async function loadAudit() {
+    const res = await fetch('/api/audit?limit=500');
+    const data = await res.json();
+    const tbody = document.getElementById('auditTable');
+    tbody.innerHTML = data.map(a => {
+        const ts = a.created_at ? a.created_at.slice(0,19).replace('T',' ') : '';
+        const detail = a.detail ? JSON.stringify(a.detail).slice(0, 200) : '';
+        return `<tr>
+            <td>${a.id}</td>
+            <td>${ts}</td>
+            <td>${a.actor}</td>
+            <td><span class="badge">${a.action}</span></td>
+            <td class="muted">${detail}</td>
+        </tr>`;
+    }).join('');
+}
+loadAudit();
+</script>
+{% endblock %}

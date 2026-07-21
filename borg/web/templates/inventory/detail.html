@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Inventory Entry · Borg{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="/">Dashboard</a> / <a href="/inventory">Inventory</a> / Entry</div>
+
+{% if error %}
+<div class="panel" style="border-color: var(--danger);">
+    <p>{{ error }}</p>
+</div>
+{% else %}
+<div class="panel">
+    <h2>{{ entry.rel_path }}</h2>
+    <table>
+        <tr><th>Source</th><td>{{ entry.source }}</td></tr>
+        <tr><th>Type</th><td>{{ entry.entry_type }}</td></tr>
+        <tr><th>Size</th><td>{{ entry.size_bytes or '-' }}</td></tr>
+        <tr><th>Hash</th><td class="muted">{{ entry.content_hash or '-' }}</td></tr>
+        <tr><th>Score</th><td>{{ '%.1f'|format(entry.assimilation_score) if entry.assimilation_score is not none else '-' }}</td></tr>
+        <tr><th>Status</th><td><span class="badge">{{ entry.assimilation_status }}</span></td></tr>
+        {% if entry.assimilation_reason %}
+        <tr><th>Reason</th><td>{{ entry.assimilation_reason }}</td></tr>
+        {% endif %}
+        {% if entry.version_id %}
+        <tr><th>Version</th><td><a href="/reports/versions">#{{ entry.version_id }}</a></td></tr>
+        {% endif %}
+    </table>
+
+    <div class="actions" style="margin-top:1rem;">
+        {% if entry.entry_type == 'file' and entry.assimilation_status in ('pending', 'scored') %}
+        <form method="post" action="/inventory/{{ entry.id }}/stage" style="display:inline;">
+            <button type="submit" class="btn-primary">Stage for Assimilation</button>
+        </form>
+        {% endif %}
+        {% if entry.assimilation_status == 'staged' %}
+        <form method="post" action="/inventory/{{ entry.id }}/approve" style="display:inline;">
+            <button type="submit" class="btn-primary">Apply</button>
+        </form>
+        <form method="post" action="/inventory/{{ entry.id }}/reject" style="display:inline;">
+            <input type="text" name="reason" placeholder="Reason (optional)" style="padding:0.4rem; background:#0f1115; border:1px solid #3c414b; color:inherit; border-radius:6px;">
+            <button type="submit">Reject</button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+
+{% if entry.content %}
+<div class="panel">
+    <h2>Content Preview</h2>
+    <pre>{{ entry.content[:3000] }}{% if entry.content|length > 3000 %}...{% endif %}</pre>
+</div>
+{% endif %}
+{% endif %}
+{% endblock %}

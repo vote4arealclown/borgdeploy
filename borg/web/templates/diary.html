@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Daily Diary · Borg{% endblock %}
+{% block head %}
+<style>
+    .diary-list { display: grid; gap: 0.75rem; }
+    .diary-item { background: var(--panel); border: 1px solid #272a30; border-radius: 10px; padding: 0.9rem; display: flex; justify-content: space-between; align-items: center; }
+    .diary-item:hover { border-color: #3c414b; }
+    .diary-meta { color: var(--muted); font-size: 0.85rem; }
+    .diary-content { background: var(--panel); border: 1px solid #272a30; border-radius: 10px; padding: 1rem; margin-top: 1rem; white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.85rem; max-height: 70vh; overflow-y: auto; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="/">Dashboard</a> / Daily Diary</div>
+
+<h2 style="margin-top:0">Daily Diary</h2>
+<p class="muted">End-of-day Markdown summaries written to <code>{{ output_dir }}</code>.</p>
+
+<div class="actions">
+    <button onclick="generateDiary()">Generate Today's Diary</button>
+    <button onclick="loadDiaries()">Refresh List</button>
+</div>
+
+<div id="diaryList" class="diary-list"></div>
+<div id="diaryContent" class="diary-content" style="display:none;"></div>
+
+<script>
+    async function loadDiaries() {
+        try {
+            const res = await fetch('/api/diary');
+            const diaries = await res.json();
+            const container = document.getElementById('diaryList');
+            if (!diaries.length) {
+                container.innerHTML = '<p class="muted">No diary files yet.</p>';
+                return;
+            }
+            container.innerHTML = diaries.map(d => `
+                <div class="diary-item">
+                    <div>
+                        <strong>${d.date}</strong>
+                        <div class="diary-meta">${(d.size_bytes / 1024).toFixed(1)} KB · ${d.updated_at.slice(0,19).replace('T',' ')} UTC</div>
+                    </div>
+                    <div class="actions">
+                        <button onclick="viewDiary('${d.date}')">View</button>
+                        <a class="btn" href="/api/diary/${d.date}/download" target="_blank">Download</a>
+                    </div>
+                </div>
+            `).join('');
+        } catch (e) { console.error(e); }
+    }
+
+    async function viewDiary(dateStr) {
+        try {
+            const res = await fetch('/api/diary/' + dateStr);
+            const data = await res.json();
+            const contentDiv = document.getElementById('diaryContent');
+            if (data.status === 'ok') {
+                contentDiv.textContent = data.content;
+                contentDiv.style.display = 'block';
+                contentDiv.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                contentDiv.textContent = 'Error: ' + data.message;
+                contentDiv.style.display = 'block';
+            }
+        } catch (e) { console.error(e); }
+    }
+
+    async function generateDiary() {
+        try {
+            const res = await fetch('/api/diary/generate', { method: 'POST' });
+            const data = await res.json();
+            if (data.status === 'ok') {
+                loadDiaries();
+                viewDiary(data.date);
+            } else {
+                alert('Failed to generate diary: ' + data.message);
+            }
+        } catch (e) {
+            alert('Error: could not reach Borg.');
+        }
+    }
+
+    loadDiaries();
+</script>
+{% endblock %}

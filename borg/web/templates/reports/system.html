@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}{{ report.title }} · Borg{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="/reports/marketplace">Marketplace</a> / Borg System Report</div>
+<h2 style="margin-top:0">{{ report.title }}</h2>
+<p class="muted">Generated at {{ content.generated_at }} · Databricks export: {{ content.databricks.enabled | yesno }}</p>
+
+<div class="actions">
+    <a class="btn" href="/reports/marketplace">← Marketplace</a>
+    <a class="btn" href="/api/reports/{{ report.slug }}" target="_blank">Raw JSON</a>
+    <a class="btn" href="/api/reports/{{ report.slug }}/pdf" target="_blank">Download PDF</a>
+</div>
+
+<div class="panel">
+    <h2>System Health</h2>
+    <div class="metric"><span>CPU</span><span>{{ "%.1f" | format(content.system_status.cpu_percent) }}%</span></div>
+    <div class="metric"><span>Memory</span><span>{{ "%.0f" | format(content.system_status.memory_used_mb) }} / {{ "%.0f" | format(content.system_status.memory_total_mb) }} MB</span></div>
+    <div class="metric"><span>Database</span><span>{{ content.system_status.db_path }}</span></div>
+    <div class="metric"><span>Last brain cycle</span><span>{{ content.system_status.last_cycle_at or '--' }}</span></div>
+</div>
+
+<div class="panel">
+    <h2>Active Symbols</h2>
+    <p>{{ content.active_symbols | join(', ') }}</p>
+</div>
+
+<div class="panel">
+    <h2>Data Store Counts</h2>
+    <table>
+        <thead><tr><th>Table</th><th>Rows</th></tr></thead>
+        <tbody>
+        {% for table, count in content.counts.items() %}
+        <tr><td>{{ table }}</td><td>{{ count }}</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="panel">
+    <h2>Latest Forecasts</h2>
+    <table>
+        <thead><tr><th>Symbol</th><th>Direction</th><th>Confidence</th><th>Outcome</th><th>Created</th></tr></thead>
+        <tbody>
+        {% for f in content.latest_forecasts %}
+        <tr>
+            <td>{{ f.symbol }}</td>
+            <td class="{{ f.direction }}">{{ f.direction.upper() }}</td>
+            <td>{{ "%.1f" | format(f.confidence) }}%</td>
+            <td>{{ f.outcome or 'pending' }}</td>
+            <td class="muted">{{ f.created_at }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="panel">
+    <h2>HIP-4 Daily Predictions</h2>
+    <table>
+        <thead><tr><th>Underlying</th><th>Direction</th><th>Confidence</th><th>Target</th><th>Expiry</th></tr></thead>
+        <tbody>
+        {% for p in content.latest_hip4_predictions %}
+        <tr>
+            <td>{{ p.underlying }}</td>
+            <td class="{{ p.direction }}">{{ p.direction.upper() }}</td>
+            <td>{{ "%.1f" | format(p.confidence) }}%</td>
+            <td>{{ p.target_price }}</td>
+            <td class="muted">{{ p.expiry }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="panel">
+    <h2>Paper Trades</h2>
+    <table>
+        <thead><tr><th>Date</th><th>Underlying</th><th>Side</th><th>Stake</th><th>Potential Payout</th><th>Outcome</th><th>PnL</th></tr></thead>
+        <tbody>
+        {% for t in content.latest_paper_trades %}
+        <tr>
+            <td>{{ t.trade_date }}</td>
+            <td>{{ t.underlying }}</td>
+            <td>{{ t.side }}</td>
+            <td>${{ "%.2f" | format(t.stake) }}</td>
+            <td>${{ "%.4f" | format(t.potential_payout) }}</td>
+            <td>{{ t.outcome or 'pending' }}</td>
+            <td class="{{ 'up' if t.pnl and t.pnl > 0 else ('down' if t.pnl and t.pnl < 0 else '') }}">{{ "%.4f" | format(t.pnl) if t.pnl is not none else '--' }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="panel">
+    <h2>Databricks Export</h2>
+    <div class="metric"><span>Enabled</span><span>{{ content.databricks.enabled | yesno }}</span></div>
+    <div class="metric"><span>Host</span><span>{{ content.databricks.host or '--' }}</span></div>
+    <div class="metric"><span>Warehouse</span><span>{{ content.databricks.warehouse_id or '--' }}</span></div>
+    <div class="metric"><span>Catalog / Schema</span><span>{{ content.databricks.catalog }} / {{ content.databricks.schema }}</span></div>
+</div>
+
+<style>
+.up { color: #4ade80; }
+.down { color: #f87171; }
+.flat { color: #94a3b8; }
+</style>
+{% endblock %}

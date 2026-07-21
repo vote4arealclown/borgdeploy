@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Event Log · Borg{% endblock %}
+{% block content %}
+<div class="breadcrumb">Reports / Event Log</div>
+<h2 style="margin-top:0">Event Log</h2>
+
+<div class="actions">
+    <a class="btn" href="/api/events?limit=500" target="_blank">Raw JSON</a>
+    <button onclick="filter='all'; loadEvents()">All</button>
+    <button onclick="filter='brain'; loadEvents()">Brain</button>
+    <button onclick="filter='chat'; loadEvents()">Chat</button>
+    <button onclick="filter='system'; loadEvents()">System</button>
+    <button onclick="filter='ingest'; loadEvents()">Ingest</button>
+    <button onclick="loadEvents()">Refresh</button>
+</div>
+
+<div class="panel">
+    <table>
+        <thead><tr><th>ID</th><th>Time</th><th>Level</th><th>Category</th><th>Phase</th><th>Message</th><th>Symbol</th></tr></thead>
+        <tbody id="eventsTable"></tbody>
+    </table>
+</div>
+
+<script>
+let filter = 'all';
+async function loadEvents() {
+    const url = filter === 'all' ? '/api/events?limit=500' : '/api/events?limit=500&category=' + filter;
+    const res = await fetch(url);
+    const data = await res.json();
+    const tbody = document.getElementById('eventsTable');
+    tbody.innerHTML = data.map(e => {
+        const ts = e.ts ? e.ts.slice(0,19).replace('T',' ') : '';
+        const levelClass = 'log-level-' + e.level.toLowerCase();
+        return `<tr>
+            <td>${e.id}</td>
+            <td>${ts}</td>
+            <td class="${levelClass}">${e.level}</td>
+            <td>${e.category}</td>
+            <td class="muted">${e.phase || ''}</td>
+            <td>${e.message}</td>
+            <td class="muted">${e.symbol || ''}</td>
+        </tr>`;
+    }).join('');
+}
+loadEvents();
+</script>
+{% endblock %}

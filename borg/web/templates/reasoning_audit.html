@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Reasoning Audit · Borg{% endblock %}
+{% block content %}
+<div class="breadcrumb">Reasoning Audit</div>
+
+<div class="panel">
+    <h2>Calibration (last {{ calibration.window_days }} days)</h2>
+    <p class="muted">Mean calibration error: {{ "%.3f"|format(calibration.mean_calibration_error) }} across {{ calibration.total_audits }} audits</p>
+    {% if calibration.buckets %}
+    <table>
+        <thead>
+            <tr>
+                <th>Confidence Bucket</th>
+                <th>Expected Win Rate</th>
+                <th>Actual Win Rate</th>
+                <th>Sample Size</th>
+                <th>Error</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for bucket, data in calibration.buckets.items() %}
+            <tr>
+                <td>{{ bucket }}%</td>
+                <td>{{ "%.0f"|format(data.expected * 100) }}%</td>
+                <td>{{ "%.0f"|format(data.actual * 100) }}%</td>
+                <td>{{ data.count }}</td>
+                <td>{{ "%.3f"|format(data.calibration_error) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="muted">No reasoning audits yet. Run the brain loop and wait for forecasts to resolve.</p>
+    {% endif %}
+</div>
+
+<div class="panel">
+    <h2>Recent Reasoning Audits</h2>
+    {% if recent_audits %}
+    <table>
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Forecast</th>
+                <th>Decision</th>
+                <th>Confidence</th>
+                <th>Outcome</th>
+                <th>Calibration Error</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for audit in recent_audits %}
+            <tr>
+                <td>{{ audit.created_at }}</td>
+                <td>#{{ audit.forecast_id }}</td>
+                <td>{{ audit.reasoning_decision }}</td>
+                <td>{{ "%.1f"|format(audit.reasoning_confidence) }}%</td>
+                <td class="{% if audit.outcome_win %}up{% else %}down{% endif %}">{{ "Win" if audit.outcome_win else "Loss" }}</td>
+                <td>{{ "%.3f"|format(audit.calibration_error) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="muted">No audits recorded yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

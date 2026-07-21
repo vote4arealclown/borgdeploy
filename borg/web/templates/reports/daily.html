@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}{{ report.title }} · Borg{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="/reports/marketplace">Marketplace</a> / Daily Intelligence Brief</div>
+<h2 style="margin-top:0">{{ report.title }}</h2>
+<p class="muted">Generated at {{ content.generated_at }} for active domains: {{ content.active_domains | join(', ') }}</p>
+
+<div class="actions">
+    <a class="btn" href="/reports/marketplace">← Marketplace</a>
+    <a class="btn" href="/api/reports/{{ report.slug }}" target="_blank">Raw JSON</a>
+    <a class="btn" href="/api/reports/{{ report.slug }}/pdf" target="_blank">Download PDF</a>
+</div>
+
+<div class="panel">
+    <h2>Overnight Market Deltas</h2>
+    <table>
+        <thead><tr><th>Symbol</th><th>Price</th><th>24h Change</th><th>Category</th></tr></thead>
+        <tbody>
+        {% for d in deltas %}
+        <tr>
+            <td>{{ d.symbol }}</td>
+            <td>${{ "%.4f" | format(d.price) }}</td>
+            <td class="{{ 'up' if d.change_pct >= 0 else 'down' }}">{{ "%.2f" | format(d.change_pct) }}%</td>
+            <td class="muted">{{ d.category }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="panel">
+    <h2>Overnight News</h2>
+    <div class="news-grid">
+        <div class="news-card"><h4>MLB</h4><p>{{ content.overnight_news.mlb }}</p></div>
+        <div class="news-card"><h4>Options</h4><p>{{ content.overnight_news.options }}</p></div>
+        <div class="news-card"><h4>Crypto</h4><p>{{ content.overnight_news.crypto }}</p></div>
+        <div class="news-card"><h4>Sports</h4><p>{{ content.overnight_news.sports }}</p></div>
+    </div>
+</div>
+
+<div class="panel">
+    <h2>Today's Forecast</h2>
+    <h4 class="muted">MLB</h4>
+    <table>
+        <thead><tr><th>Time</th><th>Matchup</th><th>Prediction</th></tr></thead>
+        <tbody>
+        {% for f in content.mlb_forecasts %}
+        <tr><td>{{ f.time }}</td><td>{{ f.matchup }}</td><td>{{ f.prediction }}</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <h4 class="muted" style="margin-top:1rem">Prediction Markets</h4>
+    <table>
+        <thead><tr><th>Market</th><th>Yes</th><th>No</th></tr></thead>
+        <tbody>
+        {% for p in content.prediction_markets %}
+        <tr><td>{{ p.market }}</td><td class="up">{{ "%.1f" | format(p.yes) }}%</td><td class="down">{{ "%.1f" | format(p.no) }}%</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="panel">
+    <h2>Information & Notes</h2>
+    <div class="metric"><span>Current phase</span><span>{{ content.notes.current_phase }}</span></div>
+    <div class="metric"><span>Active loops</span><span>{{ content.notes.active_loops | join(', ') }}</span></div>
+    <div class="metric"><span>Blockers</span><span>{{ content.notes.blockers }}</span></div>
+    <div class="metric"><span>Open questions</span><span>{{ content.notes.open_questions }}</span></div>
+    <div class="metric"><span>Next report</span><span>{{ content.next_report }}</span></div>
+</div>
+
+<style>
+.news-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
+.news-card { background: #0f1115; border: 1px solid #272a30; border-radius: 8px; padding: 1rem; }
+.news-card h4 { margin: 0 0 0.5rem; color: var(--accent); }
+</style>
+{% endblock %}

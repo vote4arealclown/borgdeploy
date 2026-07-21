@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Cameras · Borg{% endblock %}
+{% block head %}
+<style>
+    .camera-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; }
+    .camera-card { background: var(--panel); border: 1px solid #272a30; border-radius: 12px; padding: 1rem; }
+    .camera-card img { width: 100%; border-radius: 8px; background: #0f1115; }
+    .status { display: flex; gap: 1rem; margin-bottom: 1rem; font-size: 0.9rem; flex-wrap: wrap; }
+    .status-item { background: var(--panel); padding: 0.5rem 0.75rem; border-radius: 6px; border: 1px solid #272a30; }
+    .ok { color: var(--accent); }
+    .bad { color: var(--danger); }
+    .muted { color: var(--muted); }
+    .camera-list { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .camera-list a { padding: 0.45rem 0.9rem; border-radius: 6px; background: #2d3139; border: 1px solid #3c414b; color: var(--text); }
+    .camera-list a.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 600; }
+</style>
+{% endblock %}
+{% block content %}
+<h2>Cameras</h2>
+
+{% if error %}
+<div style="color: var(--danger); margin-bottom: 1rem;">{{ error }}</div>
+{% endif %}
+
+{% if cameras %}
+<div class="camera-list">
+    <a href="/camera" class="{% if not selected %}active{% endif %}">All</a>
+    {% for cam in cameras %}
+    <a href="/camera/{{ cam.name }}" class="{% if selected and selected.name == cam.name %}active{% endif %}">{{ cam.name }}</a>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if selected %}
+<div class="status">
+    <div class="status-item">Name: <strong>{{ selected.name }}</strong></div>
+    <div class="status-item">Host: {{ selected.rtsp_url }}</div>
+    <div class="status-item">OpenCV: <span class="{% if selected.available %}ok{% else %}bad{% endif %}">{{ selected.available }}</span></div>
+    <div class="status-item">Connected: <span id="connStatus_{{ selected.name }}" class="bad">checking…</span></div>
+</div>
+<div class="panel">
+    <img id="liveFeed" src="/api/camera/{{ selected.name }}/stream" alt="Live camera feed: {{ selected.name }}">
+</div>
+<div class="actions">
+    <a class="btn" href="/api/camera/{{ selected.name }}/snapshot" target="_blank">Snapshot</a>
+    <button onclick="checkStatus('{{ selected.name }}')">Refresh Status</button>
+</div>
+<script>
+async function checkStatus(name) {
+    try {
+        const res = await fetch('/api/camera/' + name + '/status');
+        const data = await res.json();
+        const el = document.getElementById('connStatus_' + name);
+        el.textContent = data.connected;
+        el.className = data.connected ? 'ok' : 'bad';
+    } catch (err) {
+        console.error('Failed to fetch camera status:', err);
+    }
+}
+checkStatus('{{ selected.name }}');
+setInterval(() => checkStatus('{{ selected.name }}'), 5000);
+</script>
+
+{% else %}
+
+{% if cameras %}
+<div class="camera-grid">
+    {% for cam in cameras %}
+    <div class="camera-card">
+        <h3>{{ cam.name }}</h3>
+        <p class="muted">{{ cam.rtsp_url }}</p>
+        <p>Connected: <span class="{% if cam.connected %}ok{% else %}bad{% endif %}">{{ cam.connected }}</span></p>
+        {% if cam.last_error %}
+        <p class="muted" style="font-size: 0.8rem;">{{ cam.last_error }}</p>
+        {% endif %}
+        <div class="actions">
+            <a class="btn" href="/camera/{{ cam.name }}">View</a>
+            <a class="btn" href="/api/camera/{{ cam.name }}/snapshot" target="_blank">Snapshot</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="panel" style="color: var(--danger);">
+    No cameras configured. Add entries under <code>cameras:</code> in <code>config/borg.yaml</code>.
+</div>
+{% endif %}
+
+{% endif %}
+{% endblock %}

@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Paper Trades · Borg{% endblock %}
+{% block head %}
+<style>
+    .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 1.25rem; }
+    .summary-card { background: var(--panel); border: 1px solid #272a30; border-radius: 10px; padding: 0.9rem; text-align: center; }
+    .summary-card .value { font-size: 1.4rem; font-weight: 700; }
+    .summary-card .label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+    .win { color: var(--accent); }
+    .loss { color: var(--danger); }
+    .pending { color: var(--warn); }
+    .direction-badge { text-transform: uppercase; font-weight: 700; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="/">Dashboard</a> / Paper Trades</div>
+
+<h2 style="margin-top:0">HIP-4 Daily Paper Trades</h2>
+<p class="muted">One $1 paper trade per day on the strongest BTC, ETH, SOL, or HYPE binary option. Settled against Hyperliquid mid prices at expiry.</p>
+
+<div class="summary" id="summary">
+    <div class="summary-card"><div class="value" id="totalTrades">--</div><div class="label">Total Trades</div></div>
+    <div class="summary-card"><div class="value win" id="winCount">--</div><div class="label">Wins</div></div>
+    <div class="summary-card"><div class="value loss" id="lossCount">--</div><div class="label">Losses</div></div>
+    <div class="summary-card"><div class="value" id="winRate">--</div><div class="label">Win Rate</div></div>
+    <div class="summary-card"><div class="value" id="totalPnl">--</div><div class="label">Total PnL</div></div>
+    <div class="summary-card"><div class="value pending" id="pendingCount">--</div><div class="label">Pending</div></div>
+</div>
+
+<div class="panel">
+    <h2>Trade History</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Underlying</th>
+                <th>Side</th>
+                <th>Strike</th>
+                <th>Token Price</th>
+                <th>Quantity</th>
+                <th>Stake</th>
+                <th>Potential Payout</th>
+                <th>Outcome</th>
+                <th>Settle Price</th>
+                <th>PnL</th>
+            </tr>
+        </thead>
+        <tbody id="tradesTable"></tbody>
+    </table>
+</div>
+
+<script>
+    function formatNumber(n, decimals=4) {
+        if (n === null || n === undefined) return '--';
+        return Number(n).toFixed(decimals);
+    }
+
+    async function fetchPaperTrades() {
+        try {
+            const res = await fetch('/api/paper_trades?limit=100');
+            const trades = await res.json();
+            const tbody = document.getElementById('tradesTable');
+
+            let wins = 0, losses = 0, pending = 0, totalPnl = 0;
+            tbody.innerHTML = trades.map(t => {
+                const outcomeClass = t.outcome === 'win' ? 'win' : (t.outcome === 'loss' ? 'loss' : 'pending');
+                if (t.outcome === 'win') wins++;
+                else if (t.outcome === 'loss') losses++;
+                else pending++;
+                if (t.pnl !== null && t.pnl !== undefined) totalPnl += Number(t.pnl);
+
+                return `
+                    <tr>
+                        <td>${t.trade_date}</td>
+                        <td>${t.underlying}</td>
+                        <td class="${t.direction === 'up' ? 'up' : 'down'}">${t.side}</td>
+                        <td>${formatNumber(t.target_price)}</td>
+                        <td>${formatNumber(t.token_price)}</td>
+                        <td>${formatNumber(t.quantity)}</td>
+                        <td>$${formatNumber(t.stake, 2)}</td>
+                        <td>${formatNumber(t.potential_payout)}</td>
+                        <td class="${outcomeClass}">${t.outcome || 'pending'}</td>
+                        <td>${formatNumber(t.settle_price)}</td>
+                        <td class="${outcomeClass}">${t.pnl !== null && t.pnl !== undefined ? formatNumber(t.pnl, 4) : '--'}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            const total = trades.length;
+            document.getElementById('totalTrades').textContent = total;
+            document.getElementById('winCount').textContent = wins;
+            document.getElementById('lossCount').textContent = losses;
+            document.getElementById('pendingCount').textContent = pending;
+            document.getElementById('winRate').textContent = total ? (100 * wins / (wins + losses)).toFixed(1) + '%' : '--';
+            document.getElementById('totalPnl').textContent = '$' + formatNumber(totalPnl, 4);
+        } catch (e) { console.error(e); }
+    }
+
+    fetchPaperTrades();
+    setInterval(fetchPaperTrades, 5000);
+</script>
+{% endblock %}

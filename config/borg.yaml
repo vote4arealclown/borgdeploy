@@ -1,0 +1,144 @@
+mission: "Assist the user with autonomous binary-options market analysis, learning from outcomes, and improving forecasts while respecting safety guardrails."
+
+symbols:
+  - BTC
+  - ETH
+  - SOL
+  - HYPE
+
+trading:
+  confidence_threshold: 65.0
+  forecast_horizon_seconds: 300
+
+loop:
+  interval_seconds: 120
+  min_interval_seconds: 30
+  max_interval_seconds: 300
+  brain_interval_seconds: 120
+  brain_concurrent_symbols: 5
+  self_improve_interval_seconds: 1800
+  consciousness_interval_seconds: 120
+  consciousness_timeout_seconds: 90.0
+
+llm:
+  provider: ollama
+  model: qwen2:0.5b
+  embed_model: nomic-embed-text:latest
+  base_url: http://localhost:11434
+  max_tokens: 256
+  temperature: 0.2
+  timeout_seconds: 45
+  # Set force_fallback: true to skip Ollama and use the fast deterministic rule engine.
+  # Cycles will be much faster but forecast quality will be lower.
+  force_fallback: true
+  fallback:
+    provider: openai_compat
+    base_url: https://api.openai.com/v1
+    api_key_env: OPENAI_API_KEY
+    model: gpt-4o-mini
+
+resources:
+  ram_soft_limit_pct: 85
+  cpu_soft_limit_pct: 85
+  memory_limit_mb: 7000
+
+smb:
+  host: 10.0.0.100
+  share: projects
+  username: theone
+  # Use BORG_SMB_PASSWORD env var; do not commit plaintext passwords.
+  password: ""
+  domain: ""
+  code_extensions:
+    - .py
+    - .js
+    - .ts
+    - .sql
+    - .yaml
+    - .yml
+    - .json
+    - .md
+    - .txt
+    - .sh
+  max_file_size_bytes: 1000000
+  skip_patterns:
+    - node_modules
+    - .git
+    - __pycache__
+    - .venv
+    - venv
+    - dist
+    - build
+
+paths:
+  input: ./input
+  output: ./output
+
+# Daily diary output
+diary:
+  enabled: true
+  output_path: ./output/diary
+  hour: 23
+  minute: 59
+
+web:
+  host: 0.0.0.0
+  port: 8000
+
+pollinations:
+  enabled: true
+  api_key_env: POLLINATIONS_API_KEY
+  base_url: https://gen.pollinations.ai
+  timeout_seconds: 60
+  default_model: flux
+  image_dir: ./output/images
+
+# HyperLong local dashboard integration
+hyperlong:
+  base_url: http://10.0.0.100:8080
+  timeout_seconds: 15.0
+
+cameras:
+  - name: front
+    enabled: false
+    host: 10.0.0.91
+    rtsp_port: 554
+    rtsp_path: /Preview_01_main
+    stream_quality: 75
+    reconnect_seconds: 5
+  - name: back
+    enabled: false
+    host: 10.0.0.42
+    rtsp_port: 554
+    rtsp_path: /Preview_01_main
+    stream_quality: 75
+    reconnect_seconds: 5
+
+camera_stream_port: 8080
+camera_stream_quality: 75
+camera_reconnect_seconds: 5
+
+databricks:
+  enabled: true
+  host_env: DATABRICKS_HOST
+  token_env: DATABRICKS_TOKEN
+  warehouse_id_env: DATABRICKS_WAREHOUSE_ID
+  # Your JDBC URL pointed to the default workspace catalog/schema.
+  catalog: workspace
+  schema: default
+  # Tables to publish for external dashboards
+  tables:
+    reports: borg_reports
+    forecasts: borg_forecasts
+    hip4_predictions: borg_hip4_predictions
+    paper_trades: borg_paper_trades
+    candles: borg_candles
+
+safety:
+  require_confirmation_for:
+    - self_modify
+    - resource_heavy
+    - clone
+    - delete
+    - assimilate
+    - image_generation

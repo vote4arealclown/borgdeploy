@@ -1,0 +1,11 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'borg'
+    static_configs:
+      # For bare-metal Borg: scrape localhost.
+      # For Docker Compose: this is overridden by the compose file to use 'borg:8000'.
+      - targets: ['localhost:8000']
+    metrics_path: /metrics

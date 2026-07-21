@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}SMB Inventory · Borg{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="/">Dashboard</a> / Inventory</div>
+
+<div class="panel">
+    <h2>Scan SMB Share</h2>
+    <form method="post" action="/inventory/scan" class="actions">
+        <input type="text" name="host" placeholder="Host" value="{{ filter_source or '' }}" style="padding:0.4rem; background:#0f1115; border:1px solid #3c414b; color:inherit; border-radius:6px;">
+        <input type="text" name="share" placeholder="Share" style="padding:0.4rem; background:#0f1115; border:1px solid #3c414b; color:inherit; border-radius:6px;">
+        <input type="text" name="username" placeholder="Username" style="padding:0.4rem; background:#0f1115; border:1px solid #3c414b; color:inherit; border-radius:6px;">
+        <input type="password" name="password" placeholder="Password" style="padding:0.4rem; background:#0f1115; border:1px solid #3c414b; color:inherit; border-radius:6px;">
+        <button type="submit" class="btn-primary">Scan</button>
+    </form>
+    <form method="post" action="/inventory/score" class="actions">
+        <button type="submit">Score Candidates</button>
+    </form>
+</div>
+
+<div class="panel">
+    <h2>Entries</h2>
+    {% if entries %}
+    <table>
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Path</th>
+                <th>Size</th>
+                <th>Score</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for e in entries %}
+            <tr>
+                <td>{{ e.entry_type }}</td>
+                <td><a href="/inventory/{{ e.id }}">{{ e.rel_path }}</a></td>
+                <td class="muted">{{ e.size_bytes or '-' }}</td>
+                <td class="muted">{{ '%.1f'|format(e.assimilation_score) if e.assimilation_score is not none else '-' }}</td>
+                <td><span class="badge">{{ e.assimilation_status }}</span></td>
+                <td>
+                    {% if e.entry_type == 'file' and e.assimilation_status in ('pending', 'scored') %}
+                    <form method="post" action="/inventory/{{ e.id }}/stage" style="display:inline;">
+                        <button type="submit">Stage</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="muted">No inventory entries yet. Run a scan to populate this list.</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Consciousness · Borg{% endblock %}
+{% block content %}
+<div class="breadcrumb">Consciousness Dashboard</div>
+
+<div class="panel">
+    <h2>Daily Report</h2>
+    <pre>{{ daily_report }}</pre>
+</div>
+
+<div class="panel">
+    <h2>Weekly Report</h2>
+    <pre>{{ weekly_report }}</pre>
+</div>
+
+<div class="panel">
+    <h2>Recent Reports</h2>
+    {% if recent_reports %}
+    <table>
+        <thead>
+            <tr>
+                <th>Period</th>
+                <th>Date</th>
+                <th>Score</th>
+                <th>Created</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in recent_reports %}
+            <tr>
+                <td>{{ r.period }}</td>
+                <td>{{ r.report_date }}</td>
+                <td>{{ "%.1f"|format(r.score) if r.score is not none else "N/A" }}</td>
+                <td>{{ r.created_at }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="muted">No consciousness reports yet. They are generated automatically by the reporting loop.</p>
+    {% endif %}
+</div>
+{% endblock %}

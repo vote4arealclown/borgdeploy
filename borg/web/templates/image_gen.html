@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}Image Generation · Borg{% endblock %}
+{% block head %}
+<style>
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+    @media (max-width: 700px) { .form-grid { grid-template-columns: 1fr; } }
+    label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 0.35rem; }
+    input, textarea, select { width: 100%; background: #0f1115; border: 1px solid #272a30; color: var(--text); padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.9rem; }
+    textarea { min-height: 80px; resize: vertical; }
+    .result { margin-top: 1rem; }
+    .result img { max-width: 100%; border-radius: 8px; border: 1px solid #272a30; }
+    .spinner { display: none; color: var(--accent); }
+    .warning { background: rgba(242, 201, 76, 0.1); border: 1px solid var(--warn); color: var(--warn); padding: 0.75rem; border-radius: 6px; margin-bottom: 1rem; }
+</style>
+{% endblock %}
+{% block content %}
+<h2>Image Generation</h2>
+<p class="muted">Generate images via <a href="https://pollinations.ai" target="_blank">Pollinations.ai</a>. Costs Pollen if an API key is configured; without a key the request is rate-limited.</p>
+
+{% if needs_confirmation %}
+<div class="warning">
+    <strong>Confirmation required:</strong> image generation is gated by the safety system.
+    <button onclick="approveImageGen()" class="btn-primary" style="margin-left:0.5rem;">Approve for this session</button>
+</div>
+{% endif %}
+
+<div class="panel">
+    <form id="imageForm">
+        <div class="form-grid">
+            <div style="grid-column: 1 / -1;">
+                <label for="prompt">Prompt</label>
+                <textarea id="prompt" name="prompt" placeholder="A cyberpunk city at night, neon reflections in the rain..." required></textarea>
+            </div>
+            <div>
+                <label for="model">Model</label>
+                <input id="model" name="model" type="text" value="flux" list="modelList" placeholder="flux">
+                <datalist id="modelList">
+                    {% for m in models %}
+                    <option value="{{ m.name }}">{{ m.title or m.name }}</option>
+                    {% endfor %}
+                </datalist>
+            </div>
+            <div>
+                <label for="response_format">Output format</label>
+                <select id="response_format" name="response_format">
+                    <option value="url">Shareable URL</option>
+                    <option value="b64_json">Save locally (base64)</option>
+                </select>
+            </div>
+            <div>
+                <label for="width">Width</label>
+                <input id="width" name="width" type="number" value="1024" min="64" max="2048">
+            </div>
+            <div>
+                <label for="height">Height</label>
+                <input id="height" name="height" type="number" value="1024" min="64" max="2048">
+            </div>
+            <div>
+                <label for="seed">Seed (optional)</label>
+                <input id="seed" name="seed" type="number" placeholder="random">
+            </div>
+        </div>
+        <div class="actions">
+            <button type="submit" class="btn-primary">Generate Image</button>
+            <span class="spinner" id="spinner">Generating…</span>
+        </div>
+    </form>
+    <div id="result" class="result"></div>
+</div>
+
+<script>
+async function approveImageGen() {
+    const res = await fetch('/api/safety/image_generation/approve', {method: 'POST'});
+    const data = await res.json();
+    if (data.approved) {
+        location.reload();
+    } else {
+        alert('Approval failed');
+    }
+}
+
+document.getElementById('imageForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const payload = {
+        prompt: form.prompt.value,
+        model: form.model.value || undefined,
+        width: parseInt(form.width.value, 10),
+        height: parseInt(form.height.value, 10),
+        seed: form.seed.value ? parseInt(form.seed.value, 10) : undefined,
+        response_format: form.response_format.value,
+    };
+    const resultDiv = document.getElementById('result');
+    const spinner = document.getElementById('spinner');
+    spinner.style.display = 'inline';
+    resultDiv.innerHTML = '';
+    try {
+        const res = await fetch('/api/images/generate', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (data.status === 'ok') {
+            let html = `<p><strong>Model:</strong> ${data.model}</p>`;
+            if (data.url) {
+                html += `<p><a href="${data.url}" target="_blank">Open image URL</a></p><img src="${data.url}" alt="generated image">`;
+            } else if (data.local_path) {
+                html += `<p><strong>Saved to:</strong> ${data.local_path}</p>`;
+                if (data.b64_json) {
+                    html += `<img src="data:image/png;base64,${data.b64_json}" alt="generated image">`;
+                }
+            } else {
+                html += `<p>Image generated.</p>`;
+            }
+            resultDiv.innerHTML = html;
+        } else if (data.status === 'needs_confirmation') {
+            resultDiv.innerHTML = `<div class="warning">${data.error} <button onclick="approveImageGen()" class="btn-primary">Approve</button></div>`;
+        } else {
+            resultDiv.innerHTML = `<div class="warning">Error: ${data.error || data.status}</div>`;
+        }
+    } catch (err) {
+        resultDiv.innerHTML = `<div class="warning">Request failed: ${err}</div>`;
+    } finally {
+        spinner.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

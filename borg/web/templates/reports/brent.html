@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}{{ report.title }} · Borg{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="/reports/marketplace">Marketplace</a> / Morning Brent Crude Brief</div>
+<h2 style="margin-top:0">{{ report.title }}</h2>
+<p class="muted">{{ report.description }}</p>
+
+<div class="actions">
+    <a class="btn" href="/reports/marketplace">← Marketplace</a>
+    <a class="btn" href="/api/reports/{{ report.slug }}" target="_blank">Raw JSON</a>
+    <a class="btn" href="/api/reports/{{ report.slug }}/pdf" target="_blank">Download PDF</a>
+</div>
+
+<div class="panel">
+    <h2>Snapshot</h2>
+    <div class="metric"><span>Brent Price</span><span>${{ "%.2f" | format(content.brent_price) }}</span></div>
+    <div class="metric"><span>24h Change</span><span class="{{ 'up' if content.change_pct >= 0 else 'down' }}">{{ "%.2f" | format(content.change_pct) }}%</span></div>
+    <div class="metric"><span>Inventory Signal</span><span>{{ content.inventory_signal }}</span></div>
+    <div class="metric"><span>U.S. Rig Count</span><span>{{ content.rig_count }}</span></div>
+</div>
+
+<div class="panel">
+    <h2>Headlines</h2>
+    <ul>
+    {% for h in content.headlines %}
+        <li>{{ h }}</li>
+    {% endfor %}
+    </ul>
+</div>
+{% endblock %}

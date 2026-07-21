@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Goals & Tasks · Borg{% endblock %}
+{% block content %}
+<div class="breadcrumb">Reports / Goals & Tasks</div>
+<h2 style="margin-top:0">Goals & Tasks Report</h2>
+
+<div class="actions">
+    <a class="btn" href="/api/goals?limit=200" target="_blank">Goals JSON</a>
+    <a class="btn" href="/api/tasks?limit=200" target="_blank">Tasks JSON</a>
+    <button onclick="loadData()">Refresh</button>
+</div>
+
+<div class="panel">
+    <h2>Create Goal</h2>
+    <form id="goalForm" style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+        <input id="goalTitle" type="text" placeholder="Goal title" required style="flex:1; min-width:120px; background:#0f1115; border:1px solid #272a30; color:var(--text); padding:0.5rem 0.75rem; border-radius:6px;">
+        <input id="goalDescription" type="text" placeholder="Description (optional)" style="flex:1; min-width:160px; background:#0f1115; border:1px solid #272a30; color:var(--text); padding:0.5rem 0.75rem; border-radius:6px;">
+        <input id="goalPriority" type="number" min="1" max="100" value="50" title="Priority 1-100" style="width:70px; background:#0f1115; border:1px solid #272a30; color:var(--text); padding:0.5rem 0.75rem; border-radius:6px;">
+        <button type="submit">Add Goal</button>
+    </form>
+</div>
+
+<div class="panel">
+    <h2>Goals</h2>
+    <table>
+        <thead><tr><th>ID</th><th>Title</th><th>Priority</th><th>Status</th><th>Created</th></tr></thead>
+        <tbody id="goalsTable"></tbody>
+    </table>
+</div>
+
+<div class="panel">
+    <h2>Tasks</h2>
+    <table>
+        <thead><tr><th>ID</th><th>Kind</th><th>Status</th><th>Created By</th><th>Created</th></tr></thead>
+        <tbody id="tasksTable"></tbody>
+    </table>
+</div>
+
+<script>
+async function loadData() {
+    const [goals, tasks] = await Promise.all([
+        fetch('/api/goals?limit=200').then(r => r.json()),
+        fetch('/api/tasks?limit=200').then(r => r.json())
+    ]);
+
+    document.getElementById('goalsTable').innerHTML = goals.map(g => {
+        const ts = g.created_at ? g.created_at.slice(0,19).replace('T',' ') : '';
+        return `<tr><td>${g.id}</td><td>${g.title}</td><td>${g.priority}</td><td><span class="badge">${g.status}</span></td><td>${ts}</td></tr>`;
+    }).join('');
+    document.getElementById('tasksTable').innerHTML = tasks.map(t => {
+        const ts = t.created_at ? t.created_at.slice(0,19).replace('T',' ') : '';
+        return `<tr><td>${t.id}</td><td>${t.kind}</td><td><span class="badge">${t.status}</span></td><td>${t.created_by}</td><td>${ts}</td></tr>`;
+    }).join('');
+}
+
+document.getElementById('goalForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const title = document.getElementById('goalTitle').value.trim();
+    const description = document.getElementById('goalDescription').value.trim();
+    const priority = document.getElementById('goalPriority').value;
+    if (!title) return;
+    try {
+        const res = await fetch('/api/goals', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'title=' + encodeURIComponent(title) + '&description=' + encodeURIComponent(description) + '&priority=' + encodeURIComponent(priority)
+        });
+        if (res.ok) {
+            document.getElementById('goalForm').reset();
+            document.getElementById('goalPriority').value = '50';
+            loadData();
+        } else {
+            alert('Failed to create goal');
+        }
+    } catch (err) {
+        alert('Error: could not reach Borg.');
+    }
+});
+
+loadData();
+</script>
+{% endblock %}

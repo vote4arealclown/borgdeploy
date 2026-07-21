@@ -1,0 +1,21 @@
+[Unit]
+Description=Borg autonomous agent
+After=network.target postgresql.service ollama.service
+Wants=postgresql.service ollama.service
+
+[Service]
+Type=simple
+User=theone
+WorkingDirectory=/home/theone/BorgDeploy
+Environment=PYTHONUNBUFFERED=1
+EnvironmentFile=-/home/theone/BorgDeploy/.env
+ExecStart=/home/theone/BorgDeploy/.venv/bin/python -m borg.main all --host 0.0.0.0 --port 8000
+Restart=on-failure
+RestartSec=5
+# Raised limits so Borg can use more of the box when available.
+MemoryMax=4000M
+CPUQuota=400%
+Nice=-10
+
+[Install]
+WantedBy=multi-user.target

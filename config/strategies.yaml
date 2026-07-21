@@ -1,0 +1,127 @@
+strategies:
+  - name: binary_forecast
+    type: binary_forecast
+    enabled: true
+    params:
+      confidence_threshold: 65
+      quantity: 1
+      max_position_size_usd: 100
+      max_drawdown_pct: 5
+      max_leverage: 1
+
+  - name: mean_reversion
+    type: mean_reversion
+    enabled: true
+    params:
+      ma_period: 20
+      deviation_threshold: 0.03
+      quantity: 2
+      max_position_size_usd: 150
+      max_drawdown_pct: 3
+      max_leverage: 1.5
+
+  - name: momentum
+    type: momentum
+    enabled: true
+    params:
+      lookback_period: 10
+      momentum_threshold: 0.005
+      quantity: 1
+      max_position_size_usd: 100
+      max_drawdown_pct: 5
+      max_leverage: 1
+
+  - name: pairs_trading
+    type: pairs_trading
+    enabled: true
+    params:
+      lookback_period: 30
+      spread_threshold: 0.02
+      quantity: 1
+      max_position_size_usd: 100
+      max_drawdown_pct: 4
+      max_leverage: 1
+
+  - name: trend_following
+    type: trend_following
+    enabled: true
+    params:
+      fast_period: 10
+      slow_period: 30
+      quantity: 1
+      max_position_size_usd: 100
+      max_drawdown_pct: 5
+      max_leverage: 1
+
+  - name: stat_arb
+    type: stat_arb
+    enabled: true
+    params:
+      lookback_period: 30
+      z_threshold: 1.5
+      quantity: 1
+      max_position_size_usd: 100
+      max_drawdown_pct: 4
+      max_leverage: 1
+
+  - name: vwap
+    type: vwap
+    enabled: true
+    params:
+      lookback_period: 20
+      deviation_threshold: 0.005
+      quantity: 1
+      max_position_size_usd: 100
+      max_drawdown_pct: 3
+      max_leverage: 1
+
+  - name: twap
+    type: twap
+    enabled: true
+    params:
+      interval_minutes: 60
+      quantity: 0.5
+      max_position_size_usd: 100
+      max_drawdown_pct: 2
+      max_leverage: 1
+
+  - name: grid_trading
+    type: grid_trading
+    enabled: true
+    params:
+      lookback_period: 20
+      grid_levels: 5
+      grid_spacing: 0.01
+      quantity: 1
+      max_position_size_usd: 100
+      max_drawdown_pct: 3
+      max_leverage: 1
+
+  - name: market_making
+    type: market_making
+    enabled: true
+    params:
+      lookback_period: 20
+      range_threshold: 0.2
+      quantity: 1
+      max_position_size_usd: 100
+      max_drawdown_pct: 2.5
+      max_leverage: 1
+
+  - name: dca
+    type: dca
+    enabled: true
+    params:
+      interval_minutes: 60
+      quantity: 0.25
+      max_position_size_usd: 100
+      max_drawdown_pct: 2
+      max_leverage: 1
+
+meta_strategies:
+  - name: consensus_2vote
+    strategies:
+      - binary_forecast
+      - mean_reversion
+    params:
+      min_votes: 2

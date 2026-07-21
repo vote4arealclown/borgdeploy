@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Forecasts Report · Borg{% endblock %}
+{% block content %}
+<div class="breadcrumb">Reports / Forecasts</div>
+<h2 style="margin-top:0">Forecasts Report</h2>
+
+<div class="actions">
+    <a class="btn" href="/api/forecasts?limit=200" target="_blank">Raw JSON</a>
+    <button onclick="loadForecasts()">Refresh</button>
+</div>
+
+<div class="panel">
+    <h2>Recent Forecasts</h2>
+    <table>
+        <thead>
+            <tr><th>ID</th><th>Time</th><th>Symbol</th><th>Direction</th><th>Confidence</th><th>Horizon</th><th>Outcome</th><th>Model</th></tr>
+        </thead>
+        <tbody id="forecastTable"></tbody>
+    </table>
+</div>
+
+<script>
+async function loadForecasts() {
+    const res = await fetch('/api/forecasts?limit=200');
+    const data = await res.json();
+    const tbody = document.getElementById('forecastTable');
+    tbody.innerHTML = data.map(f => {
+        const ts = f.created_at ? f.created_at.slice(0,19).replace('T',' ') : '';
+        const dirClass = f.direction === 'up' ? 'up' : (f.direction === 'down' ? 'down' : 'flat');
+        const outcome = f.outcome || 'pending';
+        const outcomeClass = outcome === 'win' ? 'up' : (outcome === 'loss' ? 'down' : 'flat');
+        return `<tr>
+            <td>${f.id}</td>
+            <td>${ts}</td>
+            <td>${f.symbol}</td>
+            <td class="${dirClass}">${f.direction.toUpperCase()}</td>
+            <td>${f.confidence.toFixed(1)}%</td>
+            <td>${f.horizon_s}s</td>
+            <td class="${outcomeClass}">${outcome}</td>
+            <td class="muted">${f.model_used || 'unknown'}</td>
+        </tr>`;
+    }).join('');
+}
+loadForecasts();
+</script>
+{% endblock %}

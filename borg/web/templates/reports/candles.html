@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Candles · Borg{% endblock %}
+{% block content %}
+<div class="breadcrumb">Reports / Candles</div>
+<h2 style="margin-top:0">Candles Report</h2>
+
+<div class="actions">
+    <select id="symbolSelect" onchange="loadCandles()">
+        <option value="EURUSD">EURUSD</option>
+        <option value="GBPUSD">GBPUSD</option>
+        <option value="USDJPY">USDJPY</option>
+    </select>
+    <button onclick="loadCandles()">Refresh</button>
+    <a class="btn" id="rawLink" href="/api/candles/EURUSD?limit=200" target="_blank">Raw JSON</a>
+</div>
+
+<div class="panel">
+    <table>
+        <thead><tr><th>ID</th><th>Time</th><th>Open</th><th>High</th><th>Low</th><th>Close</th><th>Volume</th></tr></thead>
+        <tbody id="candlesTable"></tbody>
+    </table>
+</div>
+
+<script>
+async function loadCandles() {
+    const symbol = document.getElementById('symbolSelect').value;
+    document.getElementById('rawLink').href = '/api/candles/' + symbol + '?limit=200';
+    const res = await fetch('/api/candles/' + symbol + '?limit=200');
+    const data = await res.json();
+    const tbody = document.getElementById('candlesTable');
+    tbody.innerHTML = data.map(c => {
+        const ts = c.ts ? c.ts.slice(0,19).replace('T',' ') : '';
+        return `<tr>
+            <td>${c.id}</td>
+            <td>${ts}</td>
+            <td>${Number(c.open).toFixed(5)}</td>
+            <td>${Number(c.high).toFixed(5)}</td>
+            <td>${Number(c.low).toFixed(5)}</td>
+            <td>${Number(c.close).toFixed(5)}</td>
+            <td>${Number(c.volume).toFixed(0)}</td>
+        </tr>`;
+    }).join('');
+}
+loadCandles();
+</script>
+{% endblock %}

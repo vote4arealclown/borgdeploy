@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Learning Performance · Borg{% endblock %}
+{% block content %}
+<div class="breadcrumb">Learning Performance</div>
+
+<div class="panel">
+    <h2>Autonomous Learning Updates</h2>
+    {% if updates %}
+    <table>
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Updates</th>
+                <th>Train Trades</th>
+                <th>Train Sharpe</th>
+                <th>Val Sharpe</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for update in updates %}
+            {% set detail = update.detail or {} %}
+            {% set perf = detail.performance or {} %}
+            {% set before = perf.before or {} %}
+            {% set after = perf.after or {} %}
+            <tr>
+                <td>{{ update.created_at }}</td>
+                <td>{{ (detail.updates or {}) | length }}</td>
+                <td>{{ before.trade_count or "N/A" }}</td>
+                <td>{{ "%.2f"|format(before.sharpe) if before.sharpe is not none else "N/A" }}</td>
+                <td>{{ "%.2f"|format(after.sharpe) if after.sharpe is not none else "N/A" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="muted">No autonomous learning updates yet. Run <code>python -m borg.main learn</code> to generate one.</p>
+    {% endif %}
+</div>
+{% endblock %}

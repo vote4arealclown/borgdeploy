@@ -1,0 +1,23 @@
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+jinja2==3.1.4
+python-multipart==0.0.19
+itsdangerous==2.2.0
+pydantic==2.10.3
+pydantic-settings==2.6.0
+httpx==0.28.1
+psutil==6.1.0
+PyYAML==6.0.2
+smbprotocol==1.13.0
+# PostgreSQL + pgvector (optional; SQLite fallback works without these)
+psycopg[binary]==3.2.3
+pgvector==0.3.6
+# Testing
+pytest==8.3.0
+pytest-asyncio==0.24.0
+prometheus-client==0.21.0
+reportlab==5.0.0
+# Databricks external dashboard export
+databricks-sdk==0.121.0
+# RTSP camera streaming
+opencv-python-headless==4.10.0.84

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Code Versions · Borg{% endblock %}
+{% block content %}
+<div class="breadcrumb">Reports / Code Versions</div>
+<h2 style="margin-top:0">Code Versions</h2>
+
+<div class="actions">
+    <a class="btn" href="/api/versions?limit=200" target="_blank">Raw JSON</a>
+    <button onclick="propose()">Propose Change</button>
+    <button onclick="loadVersions()">Refresh</button>
+</div>
+
+<div class="panel">
+    <table>
+        <thead><tr><th>ID</th><th>Module</th><th>Version</th><th>Path</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
+        <tbody id="versionsTable"></tbody>
+    </table>
+</div>
+
+<script>
+async function loadVersions() {
+    const res = await fetch('/api/versions?limit=200');
+    const data = await res.json();
+    const tbody = document.getElementById('versionsTable');
+    tbody.innerHTML = data.map(v => {
+        const ts = v.created_at ? v.created_at.slice(0,19).replace('T',' ') : '';
+        const statusClass = v.status === 'applied' ? 'up' : (v.status === 'rejected' ? 'down' : 'flat');
+        let actions = '';
+        if (v.status === 'proposed') {
+            actions = `<button onclick="applyVersion(${v.id})">Apply</button> <button onclick="rejectVersion(${v.id})">Reject</button>`;
+        }
+        return `<tr>
+            <td>${v.id}</td>
+            <td>${v.module}</td>
+            <td>${v.version}</td>
+            <td class="muted">${v.path}</td>
+            <td class="${statusClass}">${v.status}</td>
+            <td>${ts}</td>
+            <td>${actions}</td>
+        </tr>`;
+    }).join('');
+}
+
+async function propose() {
+    await fetch('/api/self-improve', {method: 'POST'});
+    loadVersions();
+}
+
+async function applyVersion(id) {
+    if (!confirm('Apply version ' + id + '? This will modify source code.')) return;
+    await fetch('/api/versions/' + id + '/apply', {method: 'POST'});
+    loadVersions();
+}
+
+async function rejectVersion(id) {
+    const reason = prompt('Reason for rejecting version ' + id + '?') || '';
+    await fetch('/api/versions/' + id + '/reject', {method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded'}, body: 'reason=' + encodeURIComponent(reason)});
+    loadVersions();
+}
+
+loadVersions();
+</script>
+{% endblock %}

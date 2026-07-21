@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Schedule · Borg{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="/reports/marketplace">Marketplace</a> / Schedule</div>
+<h2 style="margin-top:0">Event Schedule</h2>
+<p class="muted">Upcoming macro, crude oil, and sports events.</p>
+
+<div class="actions">
+    <a class="btn" href="/reports/marketplace">← Marketplace</a>
+    <a class="btn" href="/api/schedule" target="_blank">Raw JSON</a>
+    <button onclick="seedEvents()">Seed Sample Events</button>
+</div>
+
+<div class="panel">
+    <h2>Upcoming Events</h2>
+    <div id="eventsList"></div>
+</div>
+
+<script>
+function formatTime(iso) {
+    if (!iso) return '--';
+    const d = new Date(iso);
+    return d.toLocaleString([], {weekday: 'long', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'});
+}
+
+function formatDate(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString([], {weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'});
+}
+
+async function loadEvents() {
+    const res = await fetch('/api/schedule');
+    const events = await res.json();
+    const container = document.getElementById('eventsList');
+
+    const byDay = {};
+    events.forEach(e => {
+        const d = new Date(e.event_time).toLocaleDateString();
+        if (!byDay[d]) byDay[d] = [];
+        byDay[d].push(e);
+    });
+
+    container.innerHTML = Object.entries(byDay).map(([day, dayEvents]) => `
+        <div class="day-group">
+            <h3>${formatDate(dayEvents[0].event_time)}</h3>
+            ${dayEvents.map(e => `
+                <div class="event-card">
+                    <div class="event-meta">
+                        <span class="badge impact-${e.impact.toLowerCase()}">${e.impact}</span>
+                        <span class="event-category">${e.category}</span>
+                        <span class="event-time">${formatTime(e.event_time)}</span>
+                    </div>
+                    <h4>${e.title}</h4>
+                    <p class="muted">${e.description || ''}</p>
+                    ${e.tags ? `<div class="tags">${e.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>` : ''}
+                </div>
+            `).join('')}
+        </div>
+    `).join('');
+}
+
+async function seedEvents() {
+    const btn = event.target;
+    btn.disabled = true;
+    btn.textContent = 'Seeding...';
+    try {
+        await fetch('/api/schedule/seed', {method: 'POST'});
+        loadEvents();
+    } catch (e) {
+        alert('Error: ' + e);
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Seed Sample Events';
+    }
+}
+
+loadEvents();
+</script>
+
+<style>
+.day-group { margin-bottom: 1.5rem; }
+.day-group h3 { color: var(--accent); border-bottom: 1px solid #272a30; padding-bottom: 0.5rem; }
+.event-card { background: #0f1115; border: 1px solid #272a30; border-radius: 8px; padding: 1rem; margin-bottom: 0.75rem; }
+.event-meta { display: flex; gap: 0.75rem; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; }
+.event-category { color: var(--muted); font-size: 0.85rem; }
+.event-time { color: var(--text); font-size: 0.85rem; }
+.impact-high { background: rgba(235, 87, 87, 0.2); color: #ff8a8a; }
+.impact-medium { background: rgba(242, 201, 76, 0.2); color: #ffd166; }
+.impact-low { background: rgba(76, 195, 138, 0.2); color: #7ee8b0; }
+.tags { margin-top: 0.5rem; }
+.tag { display: inline-block; background: #2d3139; padding: 0.15rem 0.5rem; border-radius: 4px; font-size: 0.75rem; margin-right: 0.35rem; }
+</style>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Learnings Report · Borg{% endblock %}
+{% block content %}
+<div class="breadcrumb">Reports / Learnings</div>
+<h2 style="margin-top:0">Learnings & Memory Report</h2>
+
+<div class="actions">
+    <a class="btn" href="/api/learnings?limit=200" target="_blank">Raw JSON</a>
+    <button onclick="loadLearnings()">Refresh</button>
+</div>
+
+<div class="panel">
+    <h2>Recent Learnings</h2>
+    <table>
+        <thead><tr><th>ID</th><th>Time</th><th>Summary</th><th>Tags</th></tr></thead>
+        <tbody id="learningsTable"></tbody>
+    </table>
+</div>
+
+<script>
+async function loadLearnings() {
+    const res = await fetch('/api/learnings?limit=200');
+    const data = await res.json();
+    const tbody = document.getElementById('learningsTable');
+    tbody.innerHTML = data.map(l => {
+        const ts = l.created_at ? l.created_at.slice(0,19).replace('T',' ') : '';
+        const tags = Array.isArray(l.tags) ? l.tags.join(', ') : (l.tags || '');
+        return `<tr>
+            <td>${l.id}</td>
+            <td>${ts}</td>
+            <td>${l.summary}</td>
+            <td class="muted">${tags}</td>
+        </tr>`;
+    }).join('');
+}
+loadLearnings();
+</script>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}{{ report.title }} · Borg{% endblock %}
+{% block content %}
+<div class="breadcrumb"><a href="/reports/marketplace">Marketplace</a> / Coffee News Edition</div>
+<h2 style="margin-top:0">{{ report.title }}</h2>
+<p class="muted">{{ report.description }}</p>
+
+<div class="actions">
+    <a class="btn" href="/reports/marketplace">← Marketplace</a>
+    <a class="btn" href="/api/reports/{{ report.slug }}" target="_blank">Raw JSON</a>
+    <a class="btn" href="/api/reports/{{ report.slug }}/pdf" target="_blank">Download PDF</a>
+</div>
+
+<div class="panel newspaper">
+    <h1 class="headline">{{ content.headline }}</h1>
+    <div class="subhead">{{ content.overnight_summary }}</div>
+    <div class="two-col">
+        <div class="panel">
+            <h3>Market Tick</h3>
+            <p class="big">{{ content.market_tick }}</p>
+        </div>
+        <div class="panel">
+            <h3>Today's Lock</h3>
+            <p class="big">{{ content.todays_lock }}</p>
+        </div>
+    </div>
+
+    {% for section in content.sections %}
+    <div class="article">
+        <h3>{{ section.title }}</h3>
+        <p>{{ section.body }}</p>
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+.newspaper { background: #0f1115; }
+.headline { font-family: Georgia, serif; font-size: 2.2rem; text-align: center; margin: 0 0 0.5rem; border-bottom: 2px solid var(--accent); padding-bottom: 0.75rem; }
+.subhead { text-align: center; color: var(--muted); margin-bottom: 1.5rem; }
+.big { font-size: 1.2rem; color: var(--accent); }
+.article { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #272a30; }
+</style>
+{% endblock %}

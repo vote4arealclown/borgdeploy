@@ -1,0 +1,27 @@
+# Environment secrets
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.venv/
+
+# Data / runtime
+data/*.db
+data/*.log
+data/*.pid
+tmp/*
+!tmp/.gitkeep
+input/*
+!input/.gitkeep
+output/*
+!output/.gitkeep
+output/diary/*
+!output/diary/.gitkeep
+output/processed/*
+!output/processed/.gitkeep
+output/images/*
+!output/images/.gitkeep

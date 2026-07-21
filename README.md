@@ -10,6 +10,26 @@
 
 > ⭐ **If you like the concept, please star the repo.** Stars help others find the project and keep development moving.
 
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB?logo=python&logoColor=white" alt="Python">
+  <img src="https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white" alt="FastAPI">
+  <img src="https://img.shields.io/badge/Pydantic-E92063?logo=pydantic&logoColor=white" alt="Pydantic">
+  <img src="https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white" alt="PostgreSQL">
+  <img src="https://img.shields.io/badge/SQLite-003B57?logo=sqlite&logoColor=white" alt="SQLite">
+  <img src="https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white" alt="Docker">
+  <img src="https://img.shields.io/badge/systemd-FFFFFF?logo=systemd&logoColor=black" alt="systemd">
+  <img src="https://img.shields.io/badge/Prometheus-E6522C?logo=prometheus&logoColor=white" alt="Prometheus">
+  <img src="https://img.shields.io/badge/Grafana-F46800?logo=grafana&logoColor=white" alt="Grafana">
+  <img src="https://img.shields.io/badge/Databricks-FF3621?logo=databricks&logoColor=white" alt="Databricks">
+  <img src="https://img.shields.io/badge/Ollama-000000?logo=ollama&logoColor=white" alt="Ollama">
+  <img src="https://img.shields.io/badge/HyperLiquid-4A90E2?logo=ethereum&logoColor=white" alt="HyperLiquid">
+  <img src="https://img.shields.io/badge/pytest-0A9EDC?logo=pytest&logoColor=white" alt="pytest">
+</p>
+
+## Executive Summary
+
+Borg is an autonomous trading research assistant. You point it at a few markets (BTC, ETH, SOL, HYPE by default), and it watches prices, runs eleven algorithmic strategies, scores the signals, and writes a daily Markdown report — all on its own. It keeps a memory of what worked and what didn't, can propose its own code improvements, and exposes everything through a web dashboard. It is designed to run on a small Linux box at home, work offline using a built-in rule engine, and optionally connect to Ollama, Databricks, or a local HyperLong dashboard when you want more horsepower.
+
 A self-contained, autonomous AI agent that runs an **OODA loop** (Observe → Orient/Plan → Act → Reflect) on market data. It forecasts short-term direction, stores semantic memory with embedding-based recall, learns from outcomes, and exposes a web dashboard with a colony-style visualization and a grounded chat interface.
 
 Designed to fit on modest hardware (4 GB RAM Debian) and works **without Ollama** by falling back to a deterministic rule engine. If Ollama is running with `tinyllama:latest` and `nomic-embed-text:latest`, Borg uses the local LLM automatically.

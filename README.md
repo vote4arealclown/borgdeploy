@@ -70,6 +70,7 @@ Replace `<host-ip>` with the machine's LAN IP.
 - **Pluggable strategies**: 11 algorithmic strategies including binary forecast, mean reversion, momentum, pairs trading, trend following, statistical arbitrage, VWAP, TWAP, grid trading, market making, and DCA. Loaded from `config/strategies.yaml`.
 - **Strategy reporting**: daily aggregated signal counts per symbol and per strategy, available via `/api/strategies/report` and included in the daily diary.
 - **HyperLong integration**: fetches chart/indicator data from a local HyperLong dashboard (default `http://localhost:8080`) and includes a snapshot in the daily diary and daily report.
+- **Databricks export**: optionally publishes forecasts, paper trades, reports, and candles to Databricks SQL/Delta tables for external dashboards.
 - **Hybrid LLM**: fast local Ollama first; escalates low-confidence forecasts to OpenAI-compatible models when configured.
 - **Prometheus + Grafana**: `/metrics` endpoint, compose services, and a pre-built Borg System Overview dashboard.
 - **Profiling**: `scripts/profile_brain.py` breaks down cycle latency by phase.
@@ -310,6 +311,30 @@ docker compose up -d prometheus grafana
 - Grafana provisioning: `monitoring/grafana/`
 
 Tracked metrics include brain-cycle duration, LLM inference latency, memory/CPU usage, forecasts generated, errors by component, and pending tasks.
+
+---
+
+## Databricks Export (Optional)
+
+Borg can push its data to Databricks SQL/Delta tables for external dashboards and downstream analysis. The export runs once per day (after 07:00 UTC) and publishes:
+
+- `borg_reports` — daily intelligence and system reports
+- `borg_forecasts` — all forecasts with outcomes
+- `borg_hip4_predictions` — HIP-4 binary-option predictions
+- `borg_paper_trades` — paper-trade ledger and settlements
+- `borg_candles` — latest market candles
+
+To enable it, set the following in `.env`:
+
+```bash
+DATABRICKS_HOST=https://<workspace>.cloud.databricks.com
+DATABRICKS_TOKEN=dapi...
+DATABRICKS_WAREHOUSE_ID=<sql-warehouse-id>
+```
+
+Then set `databricks.enabled: true` in `config/borg.yaml` (default is `true`, but exports are skipped unless host/token are configured).
+
+The table names and catalog/schema are configurable under `databricks:` in `config/borg.yaml`.
 
 ---
 

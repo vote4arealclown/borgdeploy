@@ -37,6 +37,7 @@ Build a small, autonomous AI agent that runs an OODA loop on market data, stores
 - `borg/distributed.py` provides database-backed locks for multi-instance coordination.
 - `borg/modules/reports.py` generates a saskpoly.xyz-style report marketplace with daily, HR, Brent, and coffee-news reports; daily deltas are sourced from HyperLong when configured.
 - `borg/modules/hyperlong_client.py` fetches chart/indicator data from a local HyperLong instance for enrichment and reporting.
+- `borg/modules/databricks_export.py` pushes forecasts, paper trades, reports, and candles to Databricks SQL/Delta tables when configured.
 - `borg/modules/strategy_report.py` aggregates daily strategy signals from forecast reasoning output.
 - `borg/web/app.py` only imports from `borg.*`; do not put business logic in routes.
 
@@ -145,6 +146,15 @@ Borg can pull chart/indicator data from a local HyperLong dashboard (default `ht
 - Client: `borg/modules/hyperlong_client.py` (`fetch_chart_data`, `fetch_all_symbols`).
 - API: `GET /api/hyperlong`, `GET /api/hyperlong/{symbol}`.
 - Reporting: HyperLong snapshot is included in the daily diary and daily report market deltas.
+
+## Databricks Export (Optional)
+
+Borg can publish forecasts, HIP-4 predictions, paper trades, reports, and candles to Databricks SQL/Delta tables for external dashboards. The export is triggered once per day from the brain loop.
+
+- Configuration: `databricks:` in `config/borg.yaml` (`enabled`, `catalog`, `schema`, `tables`, env-var names for host/token/warehouse).
+- Implementation: `borg/modules/databricks_export.py`.
+- Required secrets: `DATABRICKS_HOST`, `DATABRICKS_TOKEN`, `DATABRICKS_WAREHOUSE_ID` in `.env`.
+- Tables: `borg_reports`, `borg_forecasts`, `borg_hip4_predictions`, `borg_paper_trades`, `borg_candles` (names are configurable).
 
 ## SMB Inventory & Assimilation
 

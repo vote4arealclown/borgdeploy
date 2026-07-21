@@ -1,4 +1,4 @@
-"""RimWorld-style colony visualisation state."""
+"""Colony-style visualisation state."""
 from __future__ import annotations
 
 from dataclasses import dataclass

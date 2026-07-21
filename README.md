@@ -10,7 +10,7 @@
 
 > ⭐ **If you like the concept, please star the repo.** Stars help others find the project and keep development moving.
 
-A self-contained, autonomous AI agent that runs an **OODA loop** (Observe → Orient/Plan → Act → Reflect) on market data. It forecasts short-term direction, stores semantic memory with embedding-based recall, learns from outcomes, and exposes a web dashboard with a RimWorld-style colony visualization and a grounded chat interface.
+A self-contained, autonomous AI agent that runs an **OODA loop** (Observe → Orient/Plan → Act → Reflect) on market data. It forecasts short-term direction, stores semantic memory with embedding-based recall, learns from outcomes, and exposes a web dashboard with a colony-style visualization and a grounded chat interface.
 
 Designed to fit on modest hardware (4 GB RAM Debian) and works **without Ollama** by falling back to a deterministic rule engine. If Ollama is running with `tinyllama:latest` and `nomic-embed-text:latest`, Borg uses the local LLM automatically.
 
@@ -46,7 +46,7 @@ Designed to fit on modest hardware (4 GB RAM Debian) and works **without Ollama*
 | **Improvement roadmap** | [`borg_improvements_essay.md`](./borg_improvements_essay.md) | — |
 | **Design PDF** | [`borg_hardened_design_v2.pdf`](./borg_hardened_design_v2.pdf) | — |
 
-Replace `<host-ip>` with the machine's LAN IP (e.g. `10.0.0.10`).
+Replace `<host-ip>` with the machine's LAN IP.
 
 ---
 
@@ -160,7 +160,7 @@ borg/
     mean_reversion.py    # Moving-average reversion strategy
     consensus.py         # Multi-strategy voting
   visual/
-    sim.py               # RimWorld-style colony state
+    sim.py               # Colony-style visualization state
   web/
     app.py               # FastAPI app and routes
     auth.py              # Password session middleware
@@ -378,7 +378,7 @@ The left sidebar provides links to all report pages and raw JSON API endpoints.
 
 | Panel | What it shows |
 |-------|---------------|
-| **Colony View** | RimWorld-style map. The green dot is the Borg agent; it moves between rooms as the brain changes phase (observe → plan → act → reflect). |
+| **Colony View** | Colony-style map. The green dot is the Borg agent; it moves between rooms as the brain changes phase (observe → plan → act → reflect). |
 | **System Status** | Live CPU, memory, Ollama reachability, watched symbols, and last brain-cycle time. |
 | **Current Task** | Current phase, symbol, task description, and the room the agent is heading to. |
 | **Live Event Log** | Stream of everything Borg is doing. Buttons filter by category: All, Brain, Chat, System, Ingest. |

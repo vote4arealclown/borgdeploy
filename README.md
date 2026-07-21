@@ -1,5 +1,15 @@
 # Borg Prototype — User & Operator Manual
 
+<p align="center">
+  <img src="assets/borg-banner.svg" alt="Borg — Autonomous Market Analysis Agent" width="100%">
+</p>
+
+<p align="center">
+  <a href="https://github.com/vote4arealclown/borgdeploy/stargazers"><img src="https://img.shields.io/github/stars/vote4arealclown/borgdeploy?style=social" alt="GitHub stars"></a>
+</p>
+
+> ⭐ **If you like the concept, please star the repo.** Stars help others find the project and keep development moving.
+
 A self-contained, autonomous AI agent that runs an **OODA loop** (Observe → Orient/Plan → Act → Reflect) on market data. It forecasts short-term direction, stores semantic memory with embedding-based recall, learns from outcomes, and exposes a web dashboard with a RimWorld-style colony visualization and a grounded chat interface.
 
 Designed to fit on modest hardware (4 GB RAM Debian) and works **without Ollama** by falling back to a deterministic rule engine. If Ollama is running with `tinyllama:latest` and `nomic-embed-text:latest`, Borg uses the local LLM automatically.

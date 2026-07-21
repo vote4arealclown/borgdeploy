@@ -139,7 +139,7 @@ Common RTSP paths to try if the default `/stream1` does not work:
 
 ## HyperLong Integration
 
-Borg can pull chart/indicator data from a local HyperLong dashboard (default `http://10.0.0.100:8080`) and use it for daily reporting.
+Borg can pull chart/indicator data from a local HyperLong dashboard (default `http://localhost:8080`) and use it for daily reporting.
 
 - Configuration: `hyperlong:` in `config/borg.yaml` (`base_url`, `timeout_seconds`).
 - Client: `borg/modules/hyperlong_client.py` (`fetch_chart_data`, `fetch_all_symbols`).

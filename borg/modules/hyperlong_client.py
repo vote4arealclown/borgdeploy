@@ -1,7 +1,7 @@
 """Client for the HyperLong local trading dashboard.
 
 Fetches chart/indicator data from a HyperLong instance (e.g.
-http://10.0.0.100:8080) and exposes it to Borg for reporting and enrichment.
+http://localhost:8080) and exposes it to Borg for reporting and enrichment.
 """
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ from borg.config import settings
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_BASE_URL = "http://10.0.0.100:8080"
+DEFAULT_BASE_URL = "http://localhost:8080"
 DEFAULT_TIMEOUT = 15.0
 
 

@@ -89,12 +89,12 @@ def inventory(fresh_db, fake_smb, monkeypatch):
 
 @pytest.mark.asyncio
 async def test_scan_creates_inventory_entries(inventory, fresh_db) -> None:
-    result = await inventory.scan(host="10.0.0.100", share="projects", username="u", password="p")
+    result = await inventory.scan(host="127.0.0.1", share="projects", username="u", password="p")
     assert result["status"] == "ok"
     assert result["files"] == 3
     assert result["dirs"] == 1
 
-    entries = fresh_db.get_inventory_entries(source="smb://10.0.0.100/projects")
+    entries = fresh_db.get_inventory_entries(source="smb://127.0.0.1/projects")
     assert len(entries) == 4  # 3 files + 1 dir
     paths = {e["rel_path"] for e in entries}
     assert "README.md" in paths
@@ -105,7 +105,7 @@ async def test_scan_creates_inventory_entries(inventory, fresh_db) -> None:
 
 @pytest.mark.asyncio
 async def test_scan_skips_oversized_binary_files(inventory) -> None:
-    await inventory.scan(host="10.0.0.100", share="projects", username="u", password="p")
+    await inventory.scan(host="127.0.0.1", share="projects", username="u", password="p")
     big = next(
         e for e in inventory.db.get_inventory_entries() if e["rel_path"] == "big.bin"
     )
@@ -116,7 +116,7 @@ async def test_scan_skips_oversized_binary_files(inventory) -> None:
 async def test_score_candidates_updates_status(inventory, fresh_db, monkeypatch) -> None:
     entry_id = fresh_db.insert_inventory_entry(
         {
-            "source": "smb://10.0.0.100/projects",
+            "source": "smb://127.0.0.1/projects",
             "rel_path": "strategies/rsi_strategy.py",
             "name": "rsi_strategy.py",
             "entry_type": "file",
@@ -134,7 +134,7 @@ async def test_score_candidates_updates_status(inventory, fresh_db, monkeypatch)
 
     monkeypatch.setattr(llm, "_check_ollama", offline)
 
-    result = await inventory.score_candidates(source="smb://10.0.0.100/projects")
+    result = await inventory.score_candidates(source="smb://127.0.0.1/projects")
     assert result["scored"] == 1
     updated = inventory.db.get_inventory_entry(entry_id)
     assert updated["assimilation_status"] == "scored"
@@ -151,7 +151,7 @@ async def test_stage_candidate_creates_version_and_safety_check(inventory, fresh
     )
     entry_id = fresh_db.insert_inventory_entry(
         {
-            "source": "smb://10.0.0.100/projects",
+            "source": "smb://127.0.0.1/projects",
             "rel_path": "strategies/rsi_strategy.py",
             "name": "rsi_strategy.py",
             "entry_type": "file",
@@ -179,7 +179,7 @@ async def test_stage_candidate_creates_version_and_safety_check(inventory, fresh
 async def test_apply_candidate_requires_staged_status(inventory, fresh_db, monkeypatch) -> None:
     entry_id = fresh_db.insert_inventory_entry(
         {
-            "source": "smb://10.0.0.100/projects",
+            "source": "smb://127.0.0.1/projects",
             "rel_path": "strategies/rsi_strategy.py",
             "name": "rsi_strategy.py",
             "entry_type": "file",

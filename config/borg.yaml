@@ -43,7 +43,7 @@ resources:
   memory_limit_mb: 7000
 
 smb:
-  host: 10.0.0.100
+  host: ""              # Set via BORG_SMB_HOST env var or override here
   share: projects
   username: theone
   # Use BORG_SMB_PASSWORD env var; do not commit plaintext passwords.
@@ -95,7 +95,7 @@ pollinations:
 
 # HyperLong local dashboard integration
 hyperlong:
-  base_url: http://10.0.0.100:8080
+  base_url: http://localhost:8080
   timeout_seconds: 15.0
 
 cameras:

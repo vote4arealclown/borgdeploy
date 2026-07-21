@@ -69,7 +69,7 @@ Replace `<host-ip>` with the machine's LAN IP.
 - **System monitor**: adaptive loop sleep based on CPU/RAM; throttles under load.
 - **Pluggable strategies**: 11 algorithmic strategies including binary forecast, mean reversion, momentum, pairs trading, trend following, statistical arbitrage, VWAP, TWAP, grid trading, market making, and DCA. Loaded from `config/strategies.yaml`.
 - **Strategy reporting**: daily aggregated signal counts per symbol and per strategy, available via `/api/strategies/report` and included in the daily diary.
-- **HyperLong integration**: fetches chart/indicator data from a local HyperLong dashboard (e.g. `http://10.0.0.100:8080`) and includes a snapshot in the daily diary and daily report.
+- **HyperLong integration**: fetches chart/indicator data from a local HyperLong dashboard (default `http://localhost:8080`) and includes a snapshot in the daily diary and daily report.
 - **Hybrid LLM**: fast local Ollama first; escalates low-confidence forecasts to OpenAI-compatible models when configured.
 - **Prometheus + Grafana**: `/metrics` endpoint, compose services, and a pre-built Borg System Overview dashboard.
 - **Profiling**: `scripts/profile_brain.py` breaks down cycle latency by phase.
@@ -204,7 +204,7 @@ Key settings in `config/borg.yaml`:
 | `llm.force_fallback` | `true` | Skip Ollama; use fast deterministic rule engine |
 | `llm.embed_model` | `nomic-embed-text:latest` | Embedding model |
 | `llm.base_url` | `http://localhost:11434` | Ollama API base URL |
-| `hyperlong.base_url` | `http://10.0.0.100:8080` | HyperLong dashboard API base URL |
+| `hyperlong.base_url` | `http://localhost:8080` | HyperLong dashboard API base URL |
 | `web.port` | `8000` | Dashboard port |
 | `safety.require_confirmation_for` | `self_modify, resource_heavy, clone, delete, assimilate, image_generation` | Actions needing approval |
 | `smb.skip_patterns` | `node_modules, .git, ...` | Directories excluded from SMB inventory |

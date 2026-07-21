@@ -137,11 +137,11 @@ class Settings(BaseSettings):
     )
 
     # HyperLong local dashboard integration
-    hyperlong_base_url: Optional[str] = Field(default=_yaml_get("hyperlong.base_url", "http://10.0.0.100:8080"))
+    hyperlong_base_url: Optional[str] = Field(default=_yaml_get("hyperlong.base_url", "http://localhost:8080"))
     hyperlong_timeout_seconds: float = Field(default=_yaml_get("hyperlong.timeout_seconds", 15.0))
 
     # SMB inventory
-    smb_host: str = Field(default=_yaml_get("smb.host", "10.0.0.100"), validation_alias="BORG_SMB_HOST")
+    smb_host: str = Field(default=_yaml_get("smb.host", ""), validation_alias="BORG_SMB_HOST")
     smb_share: str = Field(default=_yaml_get("smb.share", "projects"), validation_alias="BORG_SMB_SHARE")
     smb_username: str = Field(default=_yaml_get("smb.username", "theone"), validation_alias="BORG_SMB_USERNAME")
     smb_password: str = Field(default=_yaml_get("smb.password", ""), validation_alias="BORG_SMB_PASSWORD")

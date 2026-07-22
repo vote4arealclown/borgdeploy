@@ -64,7 +64,14 @@ Choice and reason:"""
         choice = prompts[len(learnings) % len(prompts)]
         return await self.prove(choice)
 
-    async def prove(self, improvement: str) -> dict[str, Any]:
+    def _already_proposed(self, relative_path: str) -> bool:
+        """Return True if an open proposal already exists for this path."""
+        for version in self.versioning.list(status="proposed"):
+            if version.get("path") == relative_path and version.get("module") == "self_improve":
+                return True
+        return False
+
+    async def prove(self, improvement: str) -> Optional[dict[str, Any]]:
         """Generate a code diff proposal for the chosen improvement."""
         path_map = {
             "Improve forecast confidence threshold handling": "borg/strategies/binary_forecast.py",
@@ -73,6 +80,9 @@ Choice and reason:"""
             "Improve event log filtering in the dashboard": "borg/web/templates/dashboard.html",
         }
         relative_path = path_map.get(improvement, "borg/brain.py")
+
+        if self._already_proposed(relative_path):
+            return None
 
         original = (self.project_root / relative_path).read_text(encoding="utf-8")
 
@@ -86,6 +96,9 @@ Choice and reason:"""
             new_content = self._patch_dashboard(original)
         else:
             new_content = original + f"\n# TODO: implement '{improvement}'\n"
+
+        if new_content == original:
+            return None
 
         self.events.emit(
             f"Self-improvement proposed: {improvement}",
